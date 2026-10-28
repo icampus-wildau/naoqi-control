@@ -13,6 +13,16 @@ Pass `log=` to `NaoController` when the caller wants spoken lines and failures o
 
 The package requires Python 3.12. On Windows, use the Dev Container, since `qi` has no Windows wheels.
 
+## Local development
+
+From the other project, with the checkouts side by side:
+
+```bash
+uv add --editable ../naoqi-control
+```
+
+Restore that project's `pyproject.toml` and lockfile before committing. The committed dependency stays the PyPI release.
+
 ```python
 from naoqi_control import NaoController
 
