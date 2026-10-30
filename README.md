@@ -46,7 +46,7 @@ async def main() -> None:
 asyncio.run(main())
 ```
 
-`prepare` turns autonomous life off. If the current posture is `Sit` or `SitRelax`, that posture stays. Otherwise the robot moves to `posture`. Then it sets the speaker volume and speech speed. A speed of 100 is normal NAO speech. `restore` puts autonomous life back. `close` stops speech and the session.
+`prepare` turns autonomous life off. If the current posture is `Sit` or `SitRelax`, that posture stays. Otherwise the robot moves to `posture`. After a sit, body stiffness is released. Then it sets the speaker volume and speech speed. A speed of 100 is normal NAO speech. `restore` puts autonomous life back. `close` stops speech and the session.
 
 Pass `ports=` to try a different list, for example `ports=(9561,)`. Pass `log=` an object with `error`, `verbose`, and `nao` methods. Without it, those lines go to the `naoqi_control.log` logger.
 
@@ -93,6 +93,7 @@ from naoqi_control import Animation
 
 posture = await nao.motion.get_posture()
 # Named posture, such as "Sit" or "Stand".
+# Sit and SitRelax release body stiffness when the move finishes.
 await nao.motion.go_to_posture("Sit", speed=0.5)
 
 # Stiffness accepts a joint name or a chain.

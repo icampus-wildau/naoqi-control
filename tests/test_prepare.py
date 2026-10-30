@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import unittest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, call
 
 from naoqi_control.log import _StdLog
 from naoqi_control.motion import Motion
@@ -63,10 +63,22 @@ class TestPrepare(unittest.IsolatedAsyncioTestCase):
         life.setState.assert_called_once_with("disabled")
         motion.wakeUp.assert_not_called()
         motion.rest.assert_not_called()
-        motion.setStiffnesses.assert_called_once_with("Body", 1.0)
+        motion.setStiffnesses.assert_has_calls(
+            [call("Body", 1.0), call("Body", 0.0)]
+        )
         robot_posture.goToPosture.assert_called_once_with("Sit", 0.5)
         audio.setOutputVolume.assert_called_once_with(70)
         tts.setParameter.assert_called_once_with("speed", 110)
+
+    async def test_keeps_stiffness_after_standing(self) -> None:
+        nao, _, motion, robot_posture, _, _ = _make_controller(posture="Sit")
+        self._worker = nao._qi_worker
+        robot_posture.getPosture.return_value = "Crouch"
+
+        await nao.prepare(volume=70, speech_speed=100, posture="Stand")
+
+        motion.setStiffnesses.assert_called_once_with("Body", 1.0)
+        robot_posture.goToPosture.assert_called_once_with("Stand", 0.5)
 
     async def test_skips_posture_when_already_sitting(self) -> None:
         nao, life, motion, robot_posture, audio, tts = _make_controller(posture="Sit")

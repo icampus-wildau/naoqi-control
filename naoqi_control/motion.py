@@ -25,8 +25,19 @@ class Motion:
         return await self._call_qi(self._get_posture)
 
     async def go_to_posture(self, name: str, speed: float = 0.5) -> None:
-        """Stiffen the body and move to a named posture such as ``"Sit"`` or ``"Stand"``."""
-        await self._call_qi(self._go_to_posture, name, speed)
+        """Stiffen the body and move to a named posture such as ``"Sit"`` or ``"Stand"``.
+
+        The move is posted. A blocking ``goToPosture`` would hold the qi worker
+        for the whole stand or sit, and the link health check would time out
+        and drop the session. ``Sit`` and ``SitRelax`` release body stiffness
+        once the move has finished.
+        """
+        future = await self._call_qi(self._begin_posture, name, speed)
+        if future is not None:
+            await QiCall.wait(future, self._call_qi, self._stopped)
+        if self._stopped() or name not in ("Sit", "SitRelax"):
+            return
+        await self.set_stiffness("Body", 0.0)
 
     async def set_stiffness(self, names: str | list[str], stiffness: float) -> None:
         """Set stiffness for a joint, a chain, or ``"Body"``."""
@@ -140,9 +151,11 @@ class Motion:
     def _motion_service(self):
         return self.session.service("ALMotion")
 
-    def _go_to_posture(self, name: str, speed: float) -> None:
+    def _begin_posture(self, name: str, speed: float):
+        if self._stopped():
+            return None
         self._set_stiffness("Body", 1.0)
-        self._posture_service().goToPosture(name, speed)
+        return QiCall.start(self._posture_service(), "goToPosture", name, speed)
 
     def _set_stiffness(self, names: str | list[str], stiffness: float) -> None:
         self._motion_service().setStiffnesses(names, stiffness)

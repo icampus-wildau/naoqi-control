@@ -195,7 +195,7 @@ class NaoController:
         speech_speed: int,
         posture: str = "Sit",
     ) -> None:
-        """Disable autonomous life, go to ``posture`` when not already sitting, then set volume and TTS speed."""
+        """Disable autonomous life, go to ``posture`` when not already sitting, release stiffness after a sit, then set volume and TTS speed."""
         await self.call_qi(self._prepare, volume, speech_speed, posture)
 
     def _prepare(self, volume: int, speech_speed: int, posture: str) -> None:
@@ -209,13 +209,16 @@ class NaoController:
 
         try:
             robot_posture = self.session.service("ALRobotPosture")
+            motion = self.session.service("ALMotion")
             current = robot_posture.getPosture()
             if current in ("Sit", "SitRelax"):
                 applied_posture = current
             else:
-                self.session.service("ALMotion").setStiffnesses("Body", 1.0)
+                motion.setStiffnesses("Body", 1.0)
                 robot_posture.goToPosture(posture, 0.5)
                 applied_posture = posture
+                if posture in ("Sit", "SitRelax"):
+                    motion.setStiffnesses("Body", 0.0)
         except Exception as exc:
             self._log.error(f"prepare (posture): {exc}")
 
