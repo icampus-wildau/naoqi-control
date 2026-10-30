@@ -8,6 +8,11 @@ Installation:
 uv add naoqi-control
 ```
 
+Run `uv add` inside an existing Python project, or install into an activated
+Python 3.12 environment with `python -m pip install naoqi-control`. On Windows,
+run the environment under WSL or a Linux Dev Container. The published `qi`
+wheel supports Linux x86-64, not Linux ARM; verify the target architecture.
+
 Use it when a program on the laptop should:
 
 - let the NAO speek
@@ -106,7 +111,7 @@ await nao.motion.set_angles(["HeadYaw"], [0.0], speed=0.2)
 # ALMotion.stopMove.
 await nao.motion.stop()
 
-# There are two predefined arm maving and a head nodding and a head shaking movement. 
+# There are two predefined arm maving and a head nodding and a head shaking movement.
 # Returns immediately. Sides are "left" and "right".
 nao.motion.wave(["left"])
 
