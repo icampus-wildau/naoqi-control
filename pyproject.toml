@@ -8,13 +8,13 @@ version = "0.1.1"
 description = "Async NAOqi control for speech, motion, touch, and LEDs."
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
-license = "MIT"
+license = "Apache-2.0"
 license-files = ["LICENSE"]
 authors = [{ name = "Valentin Schröter Bonk", email = "vasc9380@th-wildau.de" }]
 maintainers = [{ name = "Valentin Schröter Bonk", email = "vasc9380@th-wildau.de" }]
 classifiers = [
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
+    "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3 :: Only",
