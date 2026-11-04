@@ -1,17 +1,14 @@
 # naoqi-control
 
+*Speak, move, and read a NAO from Python.*
+
+![PyPI](https://img.shields.io/pypi/v/naoqi-control?style=flat-square)
+![Python](https://img.shields.io/badge/python-3.12-blue?style=flat-square)
+![CI](https://img.shields.io/github/actions/workflow/status/icampus-wildau/naoqi-control/pypi.yml?style=flat-square&label=CI)
+![License: Apache 2.0](https://img.shields.io/badge/license-Apache%20License%202.0-blue)
+
+
 Async control of a NAO from Python. `NaoController` connects to NAOqi, runs blocking qi calls, exposes speech, speaker volume, motion, cameras, touch, and LEDs.
-
-Installation:
-
-```bash
-uv add naoqi-control
-```
-
-Run `uv add` inside an existing Python project, or install into an activated
-Python 3.12 environment with `python -m pip install naoqi-control`. On Windows,
-run the environment under WSL or a Linux Dev Container. The published `qi`
-wheel supports Linux x86-64, not Linux ARM; verify the target architecture.
 
 Use it when a program on the laptop should:
 
@@ -21,9 +18,36 @@ Use it when a program on the laptop should:
 
 Note: Microphone-Stream is not natively available vai NAOqi. Use [nao-websocket-bridge-client](https://github.com/icampus-wildau/nao-websocket-bridge-client) for streaming use cases.
 
-Requires Python 3.12. The `qi` dependency has no Windows wheels. On Windows, use the Dev Container in the conversation app, or WSL.
+## Installation:
 
-## Connect and speak
+```bash
+uv add naoqi-control
+```
+
+You can also install it into an activated Python 3.12 environment:
+
+```bash
+python -m pip install naoqi-control
+```
+
+## Requirements
+
+Use Python 3.12. The `qi` wheel on PyPI is Linux x86-64 only.
+
+> [!WARNING]
+> Confirm the machine is Linux x86-64 before you install. On Windows, use Windows Subsystem for Linux (WSL) or the [Dev Container](#dev-container).
+
+## Dev Container
+
+[`.devcontainer/`](.devcontainer/) is the editor environment for this repository, and a template for a project that installs `naoqi-control`. The image is Python 3.12 on Debian, with `uv`. The container uses the host network so it can reach NAOqi on ports 9559 and 9561.
+
+Open this repository and run **Dev Containers: Reopen in Container**. On start the container runs `uv sync --locked`. The terminal is inside the container. Python is `/opt/venv/bin/python`.
+
+Copy `.devcontainer/` into your own checkout to reuse it. That project needs `pyproject.toml` and `uv.lock` (`uv lock` writes the lockfile). On Docker Desktop 4.34 or newer, enable **Settings → Resources → Network → Enable host networking**, then apply and restart. Host networking does not work with Enhanced Container Isolation.
+
+## Usage
+
+### Connect and speak
 
 Construct the controller inside a running event loop. It tries port 9559, then 9561, and keeps the first port that accepts.
 
@@ -50,9 +74,7 @@ asyncio.run(main())
 
 Pass `ports=` to try a different list, for example `ports=(9561,)`. Pass `log=` an object with `error`, `verbose`, and `nao` methods. Without it, those lines go to the `naoqi_control.log` logger.
 
-## Calls
-
-These snippets use the `nao` from above.
+The following snippets use the `nao` from above.
 
 ### Speech
 
@@ -167,6 +189,18 @@ pressed = nao.buttons.front_head.is_pressed
 nao.leds.fade("FaceLeds", 0x0066FF)
 # Color is an int or a hex string.
 nao.leds.fade("FaceLeds", "#0066FF", 0.3)
+```
+
+## Call another NAOqi service
+
+`call_qi` runs one blocking callable on the shared `qi` worker. This example reads the NAOqi version from the system service (`ALSystem`).
+
+```python
+def read_version() -> str:
+    system = nao.session.service("ALSystem")
+    return system.systemVersion()
+
+version = await nao.call_qi(read_version)
 ```
 
 ## Local development

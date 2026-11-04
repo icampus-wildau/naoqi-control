@@ -1,0 +1,27 @@
+{
+  "name": "naoqi-control",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "containerEnv": {
+    "UV_PROJECT_ENVIRONMENT": "/opt/venv"
+  },
+  "mounts": [
+    "source=${localWorkspaceFolderBasename}-venv,target=/opt/venv,type=volume"
+  ],
+  "postStartCommand": ["bash", "-c", "tr -d '\\r' < .devcontainer/post-start.sh > /tmp/devcontainer-post-start.sh && bash /tmp/devcontainer-post-start.sh"],
+  "remoteUser": "vscode",
+  "runArgs": ["--network=host"],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.debugpy"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/opt/venv/bin/python",
+        "python.terminal.activateEnvironment": true
+      }
+    }
+  }
+}
